@@ -24,6 +24,8 @@ public class PlacedStudent {
     private Student student;
 
     @ManyToOne
-    @JoinColumn(name="company_id")
-    private Company company;
+    @JoinColumn(name = "drive_id")
+    private Drive drive;
+
+    private String placementStatus;
 }

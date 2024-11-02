@@ -6,24 +6,24 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import java.util.Date;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 
 @Entity
-@Table(name="CompanyDetails")
+@Table(name="CompanyName")
 @NoArgsConstructor
 @AllArgsConstructor
 @Getter
 @Setter
-public class Company {
+public class Company{
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     private String companyName;
-    private Date date;
-    private float salary;
-    private  int elgibileCgpa;
-    private  boolean historyOfArrearAllowed;
-    private boolean arrearsAllowed;
-    private String description;
+    @OneToMany(mappedBy = "company",cascade = CascadeType.ALL)
+    private List<Drive> drives= new ArrayList<>();
+
 }

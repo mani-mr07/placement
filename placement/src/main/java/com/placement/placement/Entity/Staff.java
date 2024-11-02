@@ -9,6 +9,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.util.List;
+
 @Entity
 @Table(name="StaffDetails")
 @AllArgsConstructor
@@ -22,4 +24,5 @@ public class Staff {
     private String name;
     private String email;
     private String phone;
+
 }

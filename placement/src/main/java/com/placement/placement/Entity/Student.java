@@ -6,6 +6,9 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @Entity
 @Table(name="StudentDetails")
 @Getter
@@ -26,4 +29,17 @@ public class Student {
     private  int arrears;
     private boolean historyOfArrear;
     private boolean placed;
+
+    @ManyToMany(mappedBy = "registeredStudents")
+    private List<Drive> drivesRegistered;
+
+    public void addRegisteredstudent(Drive drive){
+        if(drivesRegistered.size()>0){
+            drivesRegistered.add(drive);
+        }
+        else{
+            drivesRegistered=new ArrayList<>();
+            drivesRegistered.add(drive);
+        }
+    }
 }

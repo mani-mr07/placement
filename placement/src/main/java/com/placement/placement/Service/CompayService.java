@@ -15,6 +15,9 @@ public class CompayService {
     public List<Company> getAllDrives() {
         return companyRepository.findAll();
     }
+    public Company findById(Long id){
+        return companyRepository.findById(id).orElseThrow();
+    }
 
     public Company getDriveById(Long id) {
         return companyRepository.findById(id).orElseThrow();

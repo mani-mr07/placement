@@ -22,7 +22,7 @@ public class Registration {
     @JoinColumn(name = "student_id")
     private Student student;
     @ManyToOne
-    @JoinColumn(name = "copany_id")
-    private Company company;
+    @JoinColumn(name = "driveId")
+    private Drive drive;
     private String status;
 }

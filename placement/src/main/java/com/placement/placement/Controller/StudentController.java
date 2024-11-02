@@ -1,6 +1,8 @@
 package com.placement.placement.Controller;
 
+import com.placement.placement.Entity.Registration;
 import com.placement.placement.Entity.Student;
+import com.placement.placement.Entity.StudentDriveDTO;
 import com.placement.placement.Service.StudentService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -29,5 +31,13 @@ public class StudentController {
     @DeleteMapping("/{id}")
     public void deleteStudent(@PathVariable Long id) {
         studentService.deleteStudent(id);
+    }
+
+    @PostMapping("/registerForDrive")
+    public Registration registerforDrive(@RequestBody  StudentDriveDTO studentDriveDTO){
+        System.out.println("hi");
+        System.out.println(studentDriveDTO.getStudentID());
+        System.out.println(studentDriveDTO.getdriveID());
+        return studentService.registerforDrive(studentDriveDTO);
     }
     }
