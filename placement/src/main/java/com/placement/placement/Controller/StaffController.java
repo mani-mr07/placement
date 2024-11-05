@@ -1,14 +1,14 @@
 package com.placement.placement.Controller;
-import com.placement.placement.Entity.Company;
-import com.placement.placement.Entity.Drive;
-import com.placement.placement.Entity.DriveDTO;
-import com.placement.placement.Entity.Staff;
+import com.placement.placement.Entity.*;
+import com.placement.placement.Service.OTPService;
 import com.placement.placement.Service.StaffService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/staff")
@@ -16,9 +16,17 @@ public class StaffController {
     @Autowired
     private StaffService staffService;
 
+    @Autowired
+    private OTPService otpService;
+
+
     @GetMapping
     public List<Staff> getAllStaff() {
         return staffService.getAllStaff();
+    }
+    @GetMapping("/login")
+    public String login(@RequestBody StaffDTO staffDTO){
+        return staffService.login(staffDTO);
     }
 
     @GetMapping("/{id}")
@@ -53,5 +61,30 @@ public class StaffController {
     @PostMapping("/uploadCompany")
     public Company uploadCompany(@RequestBody Company company){
         return staffService.uploadCompanyDetails(company);
+    }
+
+
+//    @PostMapping("/generate")
+//    public ResponseEntity<String> generateOtp(@RequestBody Map<String, String> request) {
+//        String email = request.get("email");
+//        String response = otpService.generateAndSendOTP(email);
+//        return ResponseEntity.ok(response);
+//    }
+
+    // Endpoint to verify OTP
+//    @PostMapping("/verify")
+//    public ResponseEntity<String> verifyOtp(@RequestBody Map<String, String> request) {
+//        String email = request.get("email");
+//        String otp = request.get("otp");
+//        boolean isVerified = otpService.verifyOTP(email, otp);  // Implement this method in OTPService
+//
+//        if (isVerified) {
+//            return ResponseEntity.ok("OTP verified successfully.");
+//        } else {
+//            return ResponseEntity.status(400).body("Invalid or expired OTP.");
+//        }
+    @PostMapping("/placedStudent")
+    public Student placeStudent(@RequestBody StudentDriveDTO studentDriveDTO){
+        return staffService.placedStudent(studentDriveDTO);
     }
 }

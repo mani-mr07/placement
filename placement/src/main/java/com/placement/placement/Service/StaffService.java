@@ -1,16 +1,16 @@
 package com.placement.placement.Service;
 
-import com.placement.placement.Entity.Company;
-import com.placement.placement.Entity.Drive;
-import com.placement.placement.Entity.DriveDTO;
-import com.placement.placement.Entity.Staff;
+import com.placement.placement.Entity.*;
 import com.placement.placement.Repository.CompanyRepository;
 import com.placement.placement.Repository.DriveRepository;
+import com.placement.placement.Repository.PlacedStudentRepository;
 import com.placement.placement.Repository.StaffRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import javax.swing.text.html.Option;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class StaffService {
@@ -18,7 +18,16 @@ public class StaffService {
     private StaffRepository staffRepository;
 
     @Autowired
+    private StudentService studentService;
+
+    @Autowired
     private CompayService compayService;
+
+    @Autowired
+    private PlacedStudentRepository placedStudentRepository;
+
+    @Autowired
+    private  DriveService driveService;
     @Autowired
     private DriveRepository driveRepository;
     @Autowired
@@ -68,7 +77,7 @@ public class StaffService {
         drive.setSalary(driveDTO.getSalary());
         drive.setDescription(driveDTO.getDescription());
         drive.setEligibleCGPA(driveDTO.getEligibleCGPA());
-        drive.setStandingArrearAllowed(driveDTO.isStandingArrearAllowed());
+        drive.setStandingArrearLimit(driveDTO.getStandingArrearLimit());
         drive.setHistoryOfArrearAllowed(driveDTO.isHistoryOfArrearAllowed());
 
         long id=driveDTO.getCompanyId();
@@ -76,8 +85,28 @@ public class StaffService {
         drive.setCompany(company);
         return driveRepository.save(drive);
     }
-
     public Company uploadCompanyDetails(Company company){
         return companyRepository.save(company);
+    }
+
+    public Student placedStudent(StudentDriveDTO studentDriveDTO){
+        Student student=studentService.getOneStudents(studentDriveDTO.getStudentID());
+        Drive drive=driveService.findById(studentDriveDTO.getdriveID());
+        student.setPlaced(true);
+        PlacedStudent placedStudent=new PlacedStudent();
+        placedStudent.setStudent(student);
+        placedStudent.setPlacementStatus("placed");
+        placedStudent.setDrive(drive);
+        placedStudentRepository.save(placedStudent);
+        return student;
+    }
+
+    public String login(StaffDTO staffDTO) {
+        Optional<Staff> staffOptional=staffRepository.findByEmail(staffDTO.getEmail());
+        Staff staff=staffOptional.get();
+        if(staff!=null && staff.getPassword().equals(staffDTO.getPassword())){
+            return "allow";
+        }
+        return "not allow";
     }
 }

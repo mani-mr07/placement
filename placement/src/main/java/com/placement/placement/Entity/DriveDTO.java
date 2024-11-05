@@ -12,7 +12,7 @@ public class DriveDTO {
     private double salary;
     private String description;
     private int eligibleCGPA;
-    private boolean standingArrearAllowed;
+    private int standingArrearLimit;
     private boolean historyOfArrearAllowed;
     private Long companyId;
 }

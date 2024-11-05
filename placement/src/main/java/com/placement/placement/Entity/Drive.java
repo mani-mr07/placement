@@ -28,7 +28,7 @@ public class Drive {
     private String description;
 
     private int eligibleCGPA;
-    private boolean standingArrearAllowed;
+    private int standingArrearLimit;
     private boolean historyOfArrearAllowed;
 
     @ManyToOne(fetch=FetchType.LAZY,cascade=CascadeType.PERSIST)
@@ -42,8 +42,10 @@ public class Drive {
             joinColumns = @JoinColumn(name = "drive_id"),
             inverseJoinColumns = @JoinColumn(name = "student_id")
     )
+    @JsonIgnore
     private List<Student> registeredStudents;
     @OneToMany(mappedBy = "drive")
+    @JsonIgnore
     private List<PlacedStudent> placedStudents;
 
     public void addRegisteredstudent(Student student){

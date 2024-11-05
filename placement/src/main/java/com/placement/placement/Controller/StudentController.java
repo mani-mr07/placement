@@ -2,6 +2,7 @@ package com.placement.placement.Controller;
 
 import com.placement.placement.Entity.Registration;
 import com.placement.placement.Entity.Student;
+import com.placement.placement.Entity.StudentDTO;
 import com.placement.placement.Entity.StudentDriveDTO;
 import com.placement.placement.Service.StudentService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,9 +16,14 @@ import java.util.List;
 public class StudentController {
     @Autowired
     private StudentService studentService;
+
     @GetMapping
     public List<Student> getAllStudents() {
         return studentService.getAllStudents();
+    }
+    @GetMapping("/login")
+    public String login(@RequestBody StudentDTO studentdto){
+        return studentService.login(studentdto);
     }
     @GetMapping("/{id}")
     public Student getStudentById(@PathVariable Long id) {
@@ -40,4 +46,5 @@ public class StudentController {
         System.out.println(studentDriveDTO.getdriveID());
         return studentService.registerforDrive(studentDriveDTO);
     }
+
     }

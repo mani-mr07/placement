@@ -7,7 +7,9 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 @Entity
 @Table(name="StudentDetails")
@@ -22,6 +24,7 @@ public class Student {
 
     private String name;
     private String email;
+    private String password;
     private String phone;
     private String resume;
     private String skills;
@@ -29,6 +32,13 @@ public class Student {
     private  int arrears;
     private boolean historyOfArrear;
     private boolean placed;
+
+//    @OneToMany(mappedBy = "student", cascade = CascadeType.ALL, orphanRemoval = true)
+//    private Set<OTPStudent> otps=new HashSet<>();
+//
+//    public Set<OTPStudent> getotp() {
+//        return otps;
+//    }
 
     @ManyToMany(mappedBy = "registeredStudents")
     private List<Drive> drivesRegistered;
@@ -41,5 +51,8 @@ public class Student {
             drivesRegistered=new ArrayList<>();
             drivesRegistered.add(drive);
         }
+    }
+    public String getpassword(){
+        return this.password;
     }
 }
