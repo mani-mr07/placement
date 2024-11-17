@@ -33,6 +33,9 @@ public class Student {
     private  int arrears;
     private boolean historyOfArrear;
     private boolean placed;
+
+    @Enumerated(EnumType.STRING)
+    private Role role = Role.STUDENT;
     private Long otp;
 
     private LocalDateTime otpExpiration;
