@@ -56,6 +56,9 @@ public class StudentService {
             studentRepository.save(student);
             System.out.println("student dosent has any problem");
             emailService.sendOtpEmail(student.getEmail(),otp);
+//            otpService.generateAccessToken(student.getEmail());
+//            otpService.generateRefreshToken(student.getEmail());
+
             return true;
         }
         else{
@@ -72,12 +75,37 @@ public class StudentService {
         return false;
     }
 
+    public List<Drive>nonRegisteredDrive(Long id) {
+        List<Drive>driveList=driveRepository.findAll();
+        List<Drive>NonRegisteredDrive=new ArrayList<>();
+        Optional<Student> student1=studentRepository.findById(id);
+        Student student=student1.get();
+        for (Drive drive:driveList){
+            if(!drive.getRegisteredStudents().contains(student)){
+                NonRegisteredDrive.add(drive);
+            }
+        }
+        return NonRegisteredDrive;
+    }
+    public List<Drive>registeredDrive(Long id) {
+        List<Drive>driveList=driveRepository.findAll();
+        List<Drive>RegisteredDrive=new ArrayList<>();
+        Optional<Student> student1=studentRepository.findById(id);
+        Student student=student1.get();
+        for (Drive drive:driveList){
+            if(drive.getRegisteredStudents().contains(student)){
+                RegisteredDrive.add(drive);
+            }
+        }
+        return RegisteredDrive;
+    }
+
     public class InvalidCredentialsException extends RuntimeException {
         public InvalidCredentialsException(String message) {
             super(message);
         }
     }
-    public void login(StudentDTO studentDTO){
+    public Student login(StudentDTO studentDTO){
         Optional<Student> student=studentRepository.findByEmail(studentDTO.getEmail());
         Student student1=student.get();
      int otp=emailService.optGenerator();
@@ -86,7 +114,7 @@ public class StudentService {
      otp1.setOtp(otp);
         if(student1!=null && student1.getpassword().equals(studentDTO.getPassword())){
             emailService.sendOtpEmail(student1.getEmail(), otp);
-            return;
+            return student1;
         }
         else{
             throw new InvalidCredentialsException("Invalid email or password");
@@ -122,18 +150,18 @@ public class StudentService {
         studentRepository.deleteById(id);
     }
 
-public void registerforDrive(StudentDriveDTO studentDriveDTO) {
+public void registerforDrive(Long driveId ,Long studentId) {
     System.out.println("welcome");
 
     // Retrieve the drive by ID
-    Drive drive = driveService.findById(studentDriveDTO.getdriveID());
+    Drive drive = driveService.findById(driveId);
     if (drive == null) {
         throw new IllegalArgumentException("Drive ID is required to create a Drive.");
     }
     System.out.println("Drive retrieved successfully");
 
     // Retrieve the student by ID
-    Student student = getOneStudents(studentDriveDTO.getStudentID());
+    Student student = getOneStudents(studentId);
     if (student == null) {
         throw new IllegalArgumentException("Student ID is required to register for the Drive.");
     }

@@ -1,5 +1,6 @@
 package com.placement.placement.Configuration;
 
+import com.placement.placement.Entity.Role;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -19,11 +20,11 @@ public class SecurityConfig {
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeRequests(authorizeRequests -> authorizeRequests
                         .requestMatchers("/api/students").permitAll()
-                        .requestMatchers("/api/students/**").hasRole("STUDENT")
-                        .requestMatchers("/api/staff/**").hasRole("STAFF")
+                        .requestMatchers("/api/students/**").permitAll()
+                        .requestMatchers("/api/staff/**").permitAll()
                         .anyRequest().authenticated()
-                );  // For simplicity, using HTTP Basic Authentication here
 
+                );  // For simplicity, using HTTP Basic Authentication here
         return http.build();
     }
 }

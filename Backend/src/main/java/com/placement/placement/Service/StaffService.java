@@ -106,6 +106,18 @@ public class StaffService {
         return placedStudentRepository.findByDriveId(driveId);
     }
 
+    public List<Drive> getAllDriveByCompanyId(Long id) {
+        Optional<Company>company=companyRepository.findById(id);
+        Company company1=company.get();
+
+//        for (Drive drive:company1.getDrives()) {
+//
+//        }
+        List<Drive>drives=company1.getDrives();
+        System.out.println(drives);
+        return drives;
+    }
+
 
     //    public String login(StaffDTO staffDTO) {
 //        Optional<Staff> staffOptional=staffRepository.findByEmail(staffDTO.getEmail());

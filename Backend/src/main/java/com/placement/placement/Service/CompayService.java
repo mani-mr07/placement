@@ -12,7 +12,7 @@ public class CompayService {
     @Autowired
     private CompanyRepository companyRepository;
 
-    public List<Company> getAllDrives() {
+    public List<Company> getAllCompany() {
         return companyRepository.findAll();
     }
     public Company findById(Long id){

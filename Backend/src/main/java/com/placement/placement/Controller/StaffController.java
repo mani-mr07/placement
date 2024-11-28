@@ -1,9 +1,7 @@
 package com.placement.placement.Controller;
 import com.placement.placement.Entity.*;
-import com.placement.placement.Service.DriveService;
-import com.placement.placement.Service.OTPService;
-import com.placement.placement.Service.StaffService;
-import com.placement.placement.Service.StudentService;
+import com.placement.placement.Repository.CompanyRepository;
+import com.placement.placement.Service.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -29,8 +27,8 @@ public class StaffController {
     @Autowired
     private DriveService driveService;
 
-
-
+    @Autowired
+    private CompayService compayService;
 
     @GetMapping
     public List<Staff> getAllStaff() {
@@ -41,16 +39,23 @@ public class StaffController {
 //        return staffService.login(staffDTO);
 //    }
       @PostMapping("/login")
-      public ResponseEntity<String> login(@RequestBody StaffDTO staffdto) {
+      public ResponseEntity<?> login(@RequestBody StaffDTO staffdto) {
         try {
             staffService.login(staffdto);
-            return ResponseEntity.ok("succcessfull"); // 200 OK status for successful login
+//            System.out.println("hi");
+            String accesstoken=otpService.generateAccessToken(staffdto.getEmail());
+            String refreshtoken= otpService.generateRefreshToken(staffdto.getEmail());
+//            System.out.println("welcome");
+//            return ResponseEntity.ok("success");
+            return ResponseEntity.ok(new LoginResponse(null,true,accesstoken,refreshtoken));
         }
         catch (StudentService.InvalidCredentialsException e) {
              // Return 401 Unauthorized for invalid credentials
+            System.out.println("bye");
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(e.getMessage());
         } catch (Exception e) {
         // Return 500 Internal Server Error for any other exceptions
+            System.out.println("bye2");
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("An unexpected error occurred.");
         }
       }
@@ -73,7 +78,7 @@ public class StaffController {
     public void deleteStaff(@PathVariable Long id) {
         staffService.deleteStaff(id);
     }
-    @PostMapping("/uploadDrive")
+    @PostMapping("/{id}/uploadDrive")
     public Drive uploadDrive(@RequestBody DriveDTO drive){
 //        System.out.println("Received Drive with Company ID: " + (drive.getCompany() != null ? drive.getCompany().getId() : "null"));
 //        System.out.println("company"+drive.getCompany());
@@ -141,5 +146,13 @@ public class StaffController {
     @GetMapping("retrieve/drivePlacedStudent/{id}")
     public List<Student>getDrivePlacedStudent(@PathVariable Long id){
         return staffService.getPlacedStudentsByDriveId(id);
+    }
+    @GetMapping("retrieve/allCompany")
+    public List<Company>getAllCompany(){
+        return compayService.getAllCompany();
+    }
+    @GetMapping("{id}/getDrives")
+    public List<Drive>getDrivesById(@PathVariable Long id){
+        return staffService.getAllDriveByCompanyId(id);
     }
 }

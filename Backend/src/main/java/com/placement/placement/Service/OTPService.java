@@ -11,9 +11,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
 import java.security.Key;
+import java.security.SignatureException;
 import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.Random;
@@ -60,7 +62,7 @@ public class OTPService {
     }
 
 
-    private <T> T extractClaim(String token, Function<Claims,T> claimsResolvers)
+    public <T> T extractClaim(String token, Function<Claims, T> claimsResolvers)
     {
         final Claims claims=extractAllClaims(token);
         return claimsResolvers.apply(claims);
@@ -90,8 +92,23 @@ public class OTPService {
                 .setExpiration(new Date(System.currentTimeMillis() + 604800000))
                 .signWith(getSiginKey(),SignatureAlgorithm.HS256)
                 .compact();
-
     }
+
+    public boolean validateToken(String token, UserDetails userDetails) {
+        try {
+            // Extract username from the token
+            final String username = extractUserName(token);
+
+            // Ensure token is not expired and username matches
+            return (username.equals(userDetails.getUsername()) && !isTokenExpired(token));
+        } catch (Exception e) {
+            // Log other validation errors (optional)
+            System.out.println("Token validation error: " + e.getMessage());
+            return false;
+        }
+    }
+
+
 
 }
 
