@@ -41,6 +41,7 @@ public class JwtRequestFilter extends OncePerRequestFilter {
 
         String jwt = null;
         String username = null;
+        System.out.println("authorizationHeader"+authorizationHeader);
 
         if (authorizationHeader != null && authorizationHeader.startsWith("Bearer ")) {
             System.out.println("Authorization Header: " + authorizationHeader);
@@ -51,27 +52,12 @@ public class JwtRequestFilter extends OncePerRequestFilter {
             } catch (Exception e) {
                 response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Invalid Token");
                 return;
+
             } // Decode to get the username
         }
+        System.out.println("username"+username);
 
-//        if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
-//            UserDetails userDetails = studentService.userDetailsService().loadUserByUsername(username);
-//
-//            // Validate Token
-//            if (otpService.validateToken(jwt, userDetails)) {
-//                // Extract User ID from Token Claims
-//                Object Claims;
-//                String userIdFromToken = otpService.extractClaim(jwt, claims -> claims.get("userId", String.class));
-//
-//                // Authenticate the user
-//                UsernamePasswordAuthenticationToken authToken =
-//                        new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
-//                SecurityContextHolder.getContext().setAuthentication(authToken);
-//
-//                // Add user ID as a request attribute (Optional)
-//                request.setAttribute("userId", userIdFromToken);
-//            }
-//        }
+
         if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
             System.out.println("hi");
             UserDetails userDetails = studentService.userDetailsService().loadUserByUsername(username);
@@ -84,11 +70,13 @@ public class JwtRequestFilter extends OncePerRequestFilter {
                 Claims claims = otpService.extractAllClaims(jwt);
 
                 String role = claims.get("role", String.class);
+                System.out.println("Extracted Role: " + role);
+
                 List<GrantedAuthority> authorities = List.of(new SimpleGrantedAuthority(role));
                 UsernamePasswordAuthenticationToken authToken =
                         new UsernamePasswordAuthenticationToken(userDetails, null, authorities);
                 SecurityContextHolder.getContext().setAuthentication(authToken);
-                request.setAttribute("userId", userIdFromToken);
+                request.setAttribute("userId",claims.get("userId", Long.class));
                 System.out.println("Authorities: " + userDetails.getAuthorities());
                 System.out.println("Parsed Role from JWT: " + role);
 

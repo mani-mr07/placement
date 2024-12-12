@@ -72,7 +72,7 @@ public class StudentService {
         Student student=student1.get();
         if(student!=null && student.getOtp()==otp){
 
-            return new LoginResponse(student,otpService.generateAccessToken(student.getEmail(), student.getId()),otpService.generateRefreshToken(student.getEmail()));
+            return new LoginResponse(student,otpService.generateAccessToken(student.getEmail(), student.getId(),Role.STUDENT),otpService.generateRefreshToken(student.getEmail()));
         }
         throw new InvalidCredentialsException("Invalid userRegNumber or otp");
     }

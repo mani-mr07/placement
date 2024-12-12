@@ -41,8 +41,8 @@ public class SecurityConfig {
                         .requestMatchers("/api/staff/**").hasAnyAuthority(Role.STAFF.name())
                         .anyRequest().authenticated())
                         .sessionManagement(manager->manager.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-                        .authenticationProvider(authenticationProvider()).addFilterBefore(
-                                jwtRequestFilter, UsernamePasswordAuthenticationFilter.class
+                        .authenticationProvider(authenticationProvider())
+                .addFilterBefore(jwtRequestFilter, UsernamePasswordAuthenticationFilter.class
 
                 );  // For simplicity, using HTTP Basic Authentication here
         return http.build();

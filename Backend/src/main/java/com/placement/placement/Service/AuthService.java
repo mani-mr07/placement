@@ -22,7 +22,7 @@ public class AuthService {
         Optional<Staff> staff=staffRepository.findByEmail(staffdto.getEmail());
        Staff staff1=staff.get();
        if(staff1.getPassword().equals(staffdto.getPassword())){
-           return new StaffLoginResponse(staff1, otpService.generateAccessToken(staff1.getEmail(), staff1.getId()), otpService.generateRefreshToken(staff1.getEmail()));
+           return new StaffLoginResponse(staff1, otpService.generateAccessToken(staff1.getEmail(), staff1.getId(),Role.STAFF), otpService.generateRefreshToken(staff1.getEmail()));
        }
 
        throw new InvalidCredentialsException("Invalid email or password");
@@ -33,7 +33,7 @@ public class AuthService {
         Student student1=student.get();
 
         if(student1.getPassword().equals(studentDTO.getPassword())){
-            return new LoginResponse(student1, otpService.generateAccessToken(student1.getEmail(), student1.getId()), otpService.generateRefreshToken(student1.getEmail()));
+            return new LoginResponse(student1, otpService.generateAccessToken(student1.getEmail(), student1.getId(),Role.STUDENT), otpService.generateRefreshToken(student1.getEmail()));
         }
         throw new InvalidCredentialsException("Invalid email or password");
 

@@ -1,5 +1,6 @@
 package com.placement.placement.Service;
 
+import com.placement.placement.Entity.Role;
 import com.placement.placement.Repository.StaffRepository;
 import com.placement.placement.Repository.StudentRepository;
 import io.jsonwebtoken.Claims;
@@ -78,10 +79,11 @@ public class OTPService {
     }
 
     //Method to Generate Access Token
-    public String generateAccessToken(String email,Long userId) {
+    public String generateAccessToken(String email, Long userId, Role role) {
         return Jwts.builder()
                 .setSubject(email)
                 .claim("userId", userId)
+                .claim("role", role.name())
                 .setExpiration(new Date(System.currentTimeMillis() + 1000 * 60 * 24))
                 .signWith(getSiginKey(), SignatureAlgorithm.HS256)
                 .compact();

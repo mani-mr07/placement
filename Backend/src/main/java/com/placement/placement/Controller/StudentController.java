@@ -47,7 +47,7 @@ public class StudentController {
     public ResponseEntity<?> login(@RequestBody StudentDTO studentdto) {
         try {
           Student student=  studentService.login(studentdto);
-            String accesstoken=otpService.generateAccessToken(studentdto.getEmail(), student.getId());
+            String accesstoken=otpService.generateAccessToken(studentdto.getEmail(), student.getId(),Role.STUDENT);
 String refreshtoken= otpService.generateRefreshToken(studentdto.getEmail());
 //            return ResponseEntity.ok("succcessfull"); // 200 OK status for successful login
 //            return "suucesfulll otp sent to mail";
