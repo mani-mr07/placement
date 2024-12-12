@@ -109,10 +109,6 @@ public class StaffService {
     public List<Drive> getAllDriveByCompanyId(Long id) {
         Optional<Company>company=companyRepository.findById(id);
         Company company1=company.get();
-
-//        for (Drive drive:company1.getDrives()) {
-//
-//        }
         List<Drive>drives=company1.getDrives();
         System.out.println(drives);
         return drives;

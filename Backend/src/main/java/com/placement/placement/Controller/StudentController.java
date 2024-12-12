@@ -5,7 +5,9 @@ import com.placement.placement.Service.DriveService;
 import com.placement.placement.Service.EmailService;
 import com.placement.placement.Service.OTPService;
 import com.placement.placement.Service.StudentService;
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -45,22 +47,22 @@ public class StudentController {
     public ResponseEntity<?> login(@RequestBody StudentDTO studentdto) {
         try {
           Student student=  studentService.login(studentdto);
-            String accesstoken=otpService.generateAccessToken(studentdto.getEmail());
+            String accesstoken=otpService.generateAccessToken(studentdto.getEmail(), student.getId());
 String refreshtoken= otpService.generateRefreshToken(studentdto.getEmail());
 //            return ResponseEntity.ok("succcessfull"); // 200 OK status for successful login
 //            return "suucesfulll otp sent to mail";
             System.out.println("hi");
-            return ResponseEntity.ok(new LoginResponse(student,true,accesstoken,refreshtoken));
+            return ResponseEntity.ok(new LoginResponse(student,accesstoken,refreshtoken));
 
         }
         catch (StudentService.InvalidCredentialsException e) {
         // Return 401 Unauthorized for invalid credentials
 //        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(e.getMessage());
-            return ResponseEntity.badRequest().body(new LoginResponse(null,false,null,null));
+            return ResponseEntity.badRequest().body(new LoginResponse(null,null,null));
     } catch (Exception e) {
         // Return 500 Internal Server Error for any other exceptions
 //        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("An unexpected error occurred.");
-            return ResponseEntity.badRequest().body(new LoginResponse(null,false,null,null));
+            return ResponseEntity.badRequest().body(new LoginResponse(null,null,null));
 
         }
     }
@@ -86,11 +88,21 @@ String refreshtoken= otpService.generateRefreshToken(studentdto.getEmail());
     }
 
     @PostMapping("/{driveId}/{studentId}/registerForDrive")
-    public ResponseEntity<String> registerforDrive(@PathVariable Long driveId,@PathVariable Long studentId){
+    public ResponseEntity<String> registerforDrive(@PathVariable Long driveId,@PathVariable Long studentId,HttpServletRequest request){
         System.out.println("hi");
 //        System.out.println(studentDriveDTO.getStudentID());
 //        System.out.println(studentDriveDTO.getdriveID());
+
+
+        Long userIdFromToken = (Long) request.getAttribute("userId");
+        System.out.println("userId" +userIdFromToken);
+
+//        if (!studentId.equals(userIdFromToken)) {
+//            System.out.println("not crt");
+//            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Access denied for this user.");
+//        }
         try {
+            System.out.println("successfully registered");
             studentService.registerforDrive(driveId,studentId);
             return ResponseEntity.ok("Successfully Registered");
         }
@@ -112,26 +124,35 @@ String refreshtoken= otpService.generateRefreshToken(studentdto.getEmail());
         return "something happens";
     }
     @PostMapping("verify-otp")
-    public String verify(@RequestParam Long RegisterNumber ,@RequestParam int otp){
-        if(studentService.verify(RegisterNumber,otp)){
-            return "allow";
-        }
-        else{
-            return "not allow";
-        }
+    public LoginResponse verify(@RequestParam Long RegisterNumber ,@RequestParam int otp){
+            return studentService.verify(RegisterNumber,otp);
     }
     @GetMapping("/{id}/retrieve-non-registered-drive")
-    public List<Drive>nonRegisteredDrive(@PathVariable Long id){
-        System.out.println("hi");
-        return studentService.nonRegisteredDrive(id);
-    }
+    public  ResponseEntity<?> nonRegisteredDrive(@PathVariable Long id,HttpServletRequest request){
+        Long userIdFromToken = (Long) request.getAttribute("userId");
 
+        if (!id.equals(userIdFromToken)) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Access denied for this user.");
+        }
+        System.out.println("hi");
+        List<Drive> nonregistereddrive=studentService.nonRegisteredDrive(id);
+        return ResponseEntity.ok(nonregistereddrive);
+    }
     @GetMapping("/{id}/retrieve-registered-drive")
-    public List<Drive>registeredDrive(@PathVariable Long id){
-        return studentService.registeredDrive(id);
+    public ResponseEntity<?> registeredDrive(@PathVariable Long id, HttpServletRequest request){
+        Long userIdFromToken = (Long) request.getAttribute("userId");
+        System.out.println(userIdFromToken);
+        if (!id.equals(userIdFromToken)) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Access denied for this user.");
+        }
+        List<Drive> drives = studentService.registeredDrive(id);
+        return ResponseEntity.ok(drives);
+//        return studentService.registeredDrive(id);
     }
     @GetMapping("/reterive/{driveId}")
-    public Drive viewDrive(@PathVariable Long driveId){
+    public Drive viewDrive(@PathVariable Long driveId,HttpServletRequest request){
+        Long userIdFromToken=(Long) request.getAttribute("userId");
+        System.out.println("welcome to drivedetails");
         return  driveService.findById(driveId);
     }
     }

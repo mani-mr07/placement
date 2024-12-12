@@ -68,7 +68,7 @@ public class OTPService {
         return claimsResolvers.apply(claims);
     }
 
-    private Claims extractAllClaims(String token){
+    public Claims extractAllClaims(String token){
         return Jwts.parserBuilder().setSigningKey(getSiginKey()).build().parseClaimsJws(token).getBody();
     }
 
@@ -78,9 +78,10 @@ public class OTPService {
     }
 
     //Method to Generate Access Token
-    public String generateAccessToken(String email) {
+    public String generateAccessToken(String email,Long userId) {
         return Jwts.builder()
                 .setSubject(email)
+                .claim("userId", userId)
                 .setExpiration(new Date(System.currentTimeMillis() + 1000 * 60 * 24))
                 .signWith(getSiginKey(), SignatureAlgorithm.HS256)
                 .compact();

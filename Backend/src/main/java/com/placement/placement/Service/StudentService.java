@@ -7,6 +7,9 @@ import com.placement.placement.Repository.StudentRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -56,8 +59,6 @@ public class StudentService {
             studentRepository.save(student);
             System.out.println("student dosent has any problem");
             emailService.sendOtpEmail(student.getEmail(),otp);
-//            otpService.generateAccessToken(student.getEmail());
-//            otpService.generateRefreshToken(student.getEmail());
 
             return true;
         }
@@ -66,13 +67,14 @@ public class StudentService {
         }
     }
 
-    public boolean verify(Long registerNumber, int otp) {
+    public LoginResponse verify(Long registerNumber, int otp) {
         Optional<Student> student1=studentRepository.finByregisterNumber(registerNumber);
         Student student=student1.get();
         if(student!=null && student.getOtp()==otp){
-            return true;
+
+            return new LoginResponse(student,otpService.generateAccessToken(student.getEmail(), student.getId()),otpService.generateRefreshToken(student.getEmail()));
         }
-        return false;
+        throw new InvalidCredentialsException("Invalid userRegNumber or otp");
     }
 
     public List<Drive>nonRegisteredDrive(Long id) {
@@ -112,7 +114,7 @@ public class StudentService {
      OTP otp1=new OTP();
      otp1.setStudent(student1);
      otp1.setOtp(otp);
-        if(student1!=null && student1.getpassword().equals(studentDTO.getPassword())){
+        if(student1!=null && student1.getPassword().equals(studentDTO.getPassword())){
             emailService.sendOtpEmail(student1.getEmail(), otp);
             return student1;
         }
@@ -169,23 +171,31 @@ public void registerforDrive(Long driveId ,Long studentId) {
 
 
     if (student.isPlaced()) {
+        System.out.println("student is placed");
         throw new IllegalArgumentException("Student is already placed and cannot register for a new drive.");
     }
 
 
     if (student.getCgpa() < drive.getEligibleCGPA()) {
+        System.out.println("cgpa is less");
+
         throw new IllegalArgumentException("Student's CGPA does not meet the minimum eligibility criteria.");
     }
 
 
     if (student.isHistoryOfArrear() && !drive.isHistoryOfArrearAllowed()) {
+        System.out.println("arrear");
+
         throw new IllegalArgumentException("History of arrears is not allowed for this drive.");
     }
 
     if (student.getArrears()>drive.getStandingArrearLimit()) {
+        System.out.println("more arrear");
+
         throw new IllegalArgumentException("Standing arrears are not allowed for this drive.");
     }
     if(drive.getRegisteredStudents().contains(student)){
+        System.out.println("already registered");
         throw new IllegalArgumentException("You are already registered for this drive.");
     }
 
@@ -199,7 +209,27 @@ public void registerforDrive(Long driveId ,Long studentId) {
     registration.setStudent(student);
     registration.setDrive(drive);
     registration.setStatus("registered");
-
     registrationRepository.save(registration);
     }
+
+
+
+
+    public UserDetailsService userDetailsService()
+    {
+//        return new UserDetailsService() {
+//            @Override
+//            public UserDetails loadUserByUsername(String username)  {
+//                return (UserDetails) studentRepository.findByEmail(username)
+//                        .orElseThrow(()-> new UsernameNotFoundException("student not found"));
+//
+//            }
+//        };
+        return username -> studentRepository.findByEmail(username)
+                .orElseThrow(() -> new UsernameNotFoundException("Student not found"));
+    }
+
+
+
+
 }

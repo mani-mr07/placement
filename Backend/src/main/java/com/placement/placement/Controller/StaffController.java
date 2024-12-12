@@ -2,6 +2,7 @@ package com.placement.placement.Controller;
 import com.placement.placement.Entity.*;
 import com.placement.placement.Repository.CompanyRepository;
 import com.placement.placement.Service.*;
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -38,27 +39,7 @@ public class StaffController {
 //    public String login(@RequestBody StaffDTO staffDTO){
 //        return staffService.login(staffDTO);
 //    }
-      @PostMapping("/login")
-      public ResponseEntity<?> login(@RequestBody StaffDTO staffdto) {
-        try {
-            staffService.login(staffdto);
-//            System.out.println("hi");
-            String accesstoken=otpService.generateAccessToken(staffdto.getEmail());
-            String refreshtoken= otpService.generateRefreshToken(staffdto.getEmail());
-//            System.out.println("welcome");
-//            return ResponseEntity.ok("success");
-            return ResponseEntity.ok(new LoginResponse(null,true,accesstoken,refreshtoken));
-        }
-        catch (StudentService.InvalidCredentialsException e) {
-             // Return 401 Unauthorized for invalid credentials
-            System.out.println("bye");
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(e.getMessage());
-        } catch (Exception e) {
-        // Return 500 Internal Server Error for any other exceptions
-            System.out.println("bye2");
-        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("An unexpected error occurred.");
-        }
-      }
+
     @GetMapping("/{id}")
     public Staff getStaffById(@PathVariable Long id) {
         return staffService.getStaffById(id);
@@ -148,11 +129,19 @@ public class StaffController {
         return staffService.getPlacedStudentsByDriveId(id);
     }
     @GetMapping("retrieve/allCompany")
-    public List<Company>getAllCompany(){
+    public List<Company>getAllCompany(HttpServletRequest request){
+        Long userIdFromToken = (Long) request.getAttribute("userId");
+        System.out.println("hi welcome staff");
+//        if (!.equals(userIdFromToken)) {
+//            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Access denied for this user.");
+//        }
         return compayService.getAllCompany();
     }
     @GetMapping("{id}/getDrives")
-    public List<Drive>getDrivesById(@PathVariable Long id){
+    public List<Drive>getDrivesById(@PathVariable Long id,HttpServletRequest request){
+        Long userIdFromToken = (Long) request.getAttribute("userId");
+
+
         return staffService.getAllDriveByCompanyId(id);
     }
 }

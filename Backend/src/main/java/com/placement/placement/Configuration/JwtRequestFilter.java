@@ -1,12 +1,16 @@
 package com.placement.placement.Configuration;
 
 import com.placement.placement.Service.OTPService;
+import com.placement.placement.Service.StudentService;
+import io.jsonwebtoken.Claims;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -14,19 +18,24 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
+import java.util.List;
 
 @Component
 public class JwtRequestFilter extends OncePerRequestFilter {
 
     @Autowired
     private OTPService otpService;
-
     @Autowired
-    private UserDetailsService userDetailsService;
+    private StudentService studentService;
+
+//    @Autowired
+//    private UserDetailsService userDetailsService;
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain)
             throws ServletException, IOException {
+        System.out.println("JwtRequestFilter invoked for: " + request.getRequestURI());
+
 
         final String authorizationHeader = request.getHeader("Authorization");
 
@@ -34,27 +43,67 @@ public class JwtRequestFilter extends OncePerRequestFilter {
         String username = null;
 
         if (authorizationHeader != null && authorizationHeader.startsWith("Bearer ")) {
+            System.out.println("Authorization Header: " + authorizationHeader);
+
             jwt = authorizationHeader.substring(7); // Extract the token
-            username = otpService.extractUserName(jwt); // Decode to get the username
+            try {
+                username = otpService.extractUserName(jwt); // Decode to get the username
+            } catch (Exception e) {
+                response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Invalid Token");
+                return;
+            } // Decode to get the username
         }
 
+//        if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
+//            UserDetails userDetails = studentService.userDetailsService().loadUserByUsername(username);
+//
+//            // Validate Token
+//            if (otpService.validateToken(jwt, userDetails)) {
+//                // Extract User ID from Token Claims
+//                Object Claims;
+//                String userIdFromToken = otpService.extractClaim(jwt, claims -> claims.get("userId", String.class));
+//
+//                // Authenticate the user
+//                UsernamePasswordAuthenticationToken authToken =
+//                        new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
+//                SecurityContextHolder.getContext().setAuthentication(authToken);
+//
+//                // Add user ID as a request attribute (Optional)
+//                request.setAttribute("userId", userIdFromToken);
+//            }
+//        }
         if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
-            UserDetails userDetails = userDetailsService.loadUserByUsername(username);
+            System.out.println("hi");
+            UserDetails userDetails = studentService.userDetailsService().loadUserByUsername(username);
 
             // Validate Token
             if (otpService.validateToken(jwt, userDetails)) {
-                // Extract User ID from Token Claims
-                Object Claims;
-                String userIdFromToken = otpService.extractClaim(jwt, claims -> claims.get("userId", String.class));
+                System.out.println("validating..");
+                // Set authentication in Security Context
+                Long userIdFromToken = otpService.extractClaim(jwt, claims -> claims.get("userId", Long.class));
+                Claims claims = otpService.extractAllClaims(jwt);
 
-                // Authenticate the user
+                String role = claims.get("role", String.class);
+                List<GrantedAuthority> authorities = List.of(new SimpleGrantedAuthority(role));
                 UsernamePasswordAuthenticationToken authToken =
-                        new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
+                        new UsernamePasswordAuthenticationToken(userDetails, null, authorities);
                 SecurityContextHolder.getContext().setAuthentication(authToken);
-
-                // Add user ID as a request attribute (Optional)
                 request.setAttribute("userId", userIdFromToken);
+                System.out.println("Authorities: " + userDetails.getAuthorities());
+                System.out.println("Parsed Role from JWT: " + role);
+
+
+                System.out.println("Token valid. Adding userId to request: " + userIdFromToken);
+
+
+            } else {
+                System.out.println("invalifd token");
+                response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Invalid or Expired Token");
+                return;
             }
+        }
+        else{
+            System.out.println("something happens");
         }
         chain.doFilter(request, response);
     }
